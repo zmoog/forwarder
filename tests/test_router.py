@@ -9,6 +9,40 @@ from app.adapters.elasticsearch import Shipper
 
 @freeze_time("2023-03-12 09:47:52.039684+00:00")
 def test_router():
+
+    # metadata = {
+    #     "SequenceNumberArray": [
+    #         59
+    #     ],
+    #     "PartitionContext": {
+    #         "FullyQualifiedNamespace": "whatever.servicebus.windows.net",
+    #         "EventHubName": "azurelogs",
+    #         "ConsumerGroup": "$Default",
+    #         "PartitionId": "2"
+    #     },
+    #     "PropertiesArray": [
+    #         {}
+    #     ],
+    #     "OffsetArray": [
+    #         "616008"
+    #     ],
+    #     "PartitionKeyArray": [],
+    #     "SystemPropertiesArray": [
+    #         {
+    #             "x-opt-sequence-number": 59,
+    #             "x-opt-offset": 616008,
+    #             "x-opt-enqueued-time": "2023-03-13T01: 25: 02.25+00: 00",
+    #             "SequenceNumber": 59,
+    #             "Offset": 616008,
+    #             "PartitionKey": None,
+    #             "EnqueuedTimeUtc": "2023-03-13T01: 25: 02.25"
+    #         }
+    #     ],
+    #     "EnqueuedTimeUtcArray": [
+    #         "2023-03-13T01: 25: 02.25"
+    #     ]
+    # } 
+
     # The patching of the `elasticsearch.helpers.bulk` method is not working,
     # and I don't get why. 
     # 
@@ -20,15 +54,19 @@ def test_router():
             Shipper("http://whatever:9200", "whatever")
         )
 
-        events = [func.EventHubEvent(body=b'{"records": [{"foo": "bar"}, {"foo": "baz"}]}')]
+        events = [func.EventHubEvent(
+            body=b'{"records": [{"foo": "bar"}, {"foo": "baz"}]}',
+            # trigger_metadata=metadata,
+        )]
+        context = mock.MagicMock()
 
-        router.dispatch(events)
+        router.dispatch(events, context)
 
         bulk.assert_called_once_with(
             operations=[
-                b'{"create":{"_index":"zmoog-esf-logs"}}',
-                b'{"@timestamp":"2023-03-12T09:47:52.039684+00:00","message":"{\\"foo\\": \\"bar\\"}"}',
-                b'{"create":{"_index":"zmoog-esf-logs"}}',
-                b'{"@timestamp":"2023-03-12T09:47:52.039684+00:00","message":"{\\"foo\\": \\"baz\\"}"}'
+                b'{"create":{"_index":"logs-azure.eventhub-esf"}}',
+                b'{"event":{"kind":"event"},"cloud":{"provider":"azure"},"agent":{"name":"forwarder","type":"azure-function"},"message":"{\\"foo\\": \\"bar\\"}","azure-eventhub":{},"tags":["preserve_original_event","parse_message"],"@timestamp":"2023-03-12T09:47:52.039684+00:00"}',
+                b'{"create":{"_index":"logs-azure.eventhub-esf"}}',
+                b'{"event":{"kind":"event"},"cloud":{"provider":"azure"},"agent":{"name":"forwarder","type":"azure-function"},"message":"{\\"foo\\": \\"baz\\"}","azure-eventhub":{},"tags":["preserve_original_event","parse_message"],"@timestamp":"2023-03-12T09:47:52.039684+00:00"}'
             ]
         )

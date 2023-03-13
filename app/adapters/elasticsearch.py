@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import os
 
@@ -9,7 +10,7 @@ from app.models import Event
 
 class Shipper:
 
-    def __init__(self, endpoint: str, api_key: str, es: Elasticsearch = None, index_or_datastream = "zmoog-esf-logs") -> None:
+    def __init__(self, endpoint: str, api_key: str, es: Elasticsearch = None, index_or_datastream = "logs-azure.eventhub-esf") -> None:
         self.endpoint = endpoint
         self.api_key = api_key
         self.actions = []
@@ -30,13 +31,12 @@ class Shipper:
         """Send an event to Elasticsearch"""
         now = datetime.datetime.now(datetime.timezone.utc)
 
+        event["@timestamp"] = now.isoformat()
+
         self.actions.append({
             "_index": self.index_or_datastream,
             "_op_type": "create",
-            "_source": {
-                "@timestamp": now.isoformat(),
-                "message": event.message,
-            },
+            "_source": event,
         })
 
         if len(self.actions) >= 100:
@@ -45,7 +45,7 @@ class Shipper:
     def flush(self):
         """Flush the buffer to Elasticsearch"""
         if len(self.actions) > 0:
-            bulk(self.client, self.actions)
+            print(bulk(self.client, self.actions))
             self.actions = []
 
     @classmethod
