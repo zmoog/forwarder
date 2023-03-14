@@ -2,22 +2,20 @@ from typing import Any, Dict, List
 
 import azure.functions as func
 
-from app.adapters.elasticsearch import Shipper
-# from app.models import Agent, Event, EventHub
-# from app.models import Event
+from app.adapters.elasticsearch import Shipper, ShipperManager
 from .codec import AzureLogsCodec
 
 
 class Router:
     """Routes events from Azure Event Hub to Elasticsearch"""
     
-    def __init__(self, shipper: Shipper, codec = AzureLogsCodec()) -> None:
-        self.shipper = shipper
+    def __init__(self, shipper_manager: ShipperManager, codec = AzureLogsCodec()) -> None:
+        self.shipper_manager = shipper_manager
         self.codec = codec
 
     def dispatch(self, events: List[func.EventHubEvent], context: func.Context) -> None:
         """Dispatches events to the appropriate shipper"""
-        with self.shipper as _shipper:
+        with self.shipper_manager as _shipper:
             for event in events:
                 # logging.info('Python EventHub trigger processed an event: %s', event.get_body().decode('utf-8'))
                 # print("metadata", event.__trigger_metadata)
@@ -48,6 +46,7 @@ class Router:
                             "parse_message",
                         ],
                     })
+
 
 def _extract_eventhub_details(event: func.EventHubEvent) -> Dict[str, Any]:
     """Extracts event hub details from an event"""

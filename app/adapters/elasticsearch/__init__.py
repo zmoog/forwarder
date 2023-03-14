@@ -8,20 +8,40 @@ from elasticsearch.helpers import bulk
 from app.models import Event
 
 
-class Shipper:
+class ShipperManager:
+    """The ShipperManager is a context manager for Shipper"""
 
     def __init__(self, endpoint: str, api_key: str, es: Elasticsearch = None, index_or_datastream = "logs-azure.eventhub-esf") -> None:
-        self.endpoint = endpoint
-        self.api_key = api_key
-        self.actions = []
+        self.client = es if es else Elasticsearch(endpoint, api_key=api_key)
         self.index_or_datastream = index_or_datastream
-        self.client = es if es else Elasticsearch(endpoint, api_key=self.api_key)
+        self.shipper = None
 
     def __enter__(self):
-        return self
+        self.shipper = Shipper(
+            self.client,
+            self.index_or_datastream,
+        )
+        return self.shipper
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.flush()
+        self.shipper.flush()
+
+    @classmethod
+    def from_environment(self) -> "ShipperManager":
+        """Create a Shipper from environment variables"""
+        return ShipperManager(
+            endpoint=os.environ["ELASTICSEARCH_ENDPOINT"],
+            api_key=os.environ["ELASTICSEARCH_API_KEY"],
+        )
+    
+
+class Shipper:
+    """The Shipper sends events to Elasticsearch"""
+
+    def __init__(self, es: Elasticsearch, index_or_datastream = "logs-azure.eventhub-esf") -> None:
+        self.client = es
+        self.actions = []
+        self.index_or_datastream = index_or_datastream
 
     def info(self):
         """Get information about the Elasticsearch cluster"""
@@ -45,14 +65,6 @@ class Shipper:
     def flush(self):
         """Flush the buffer to Elasticsearch"""
         if len(self.actions) > 0:
-            print(bulk(self.client, self.actions))
+            successfull, failed = bulk(self.client, self.actions)
+            print(successfull, failed)
             self.actions = []
-
-    @classmethod
-    def from_environment(self) -> "Shipper":
-        """Create a Shipper from environment variables"""
-        return Shipper(
-            endpoint=os.environ["ELASTICSEARCH_ENDPOINT"],
-            api_key=os.environ["ELASTICSEARCH_API_KEY"],
-        )
-        

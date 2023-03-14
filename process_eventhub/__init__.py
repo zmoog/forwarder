@@ -3,10 +3,10 @@ from typing import List
 import azure.functions as func
 
 from app.adapters.eventhub import Router
-from app.adapters.elasticsearch import Shipper
+from app.adapters.elasticsearch import ShipperManager
 
 
-router = Router(Shipper.from_environment())
+router = Router(ShipperManager.from_environment())
 
 
 def main(events: List[func.EventHubEvent], context: func.Context):

@@ -4,7 +4,7 @@ from unittest import mock
 from freezegun import freeze_time
 
 from app.adapters.eventhub import Router
-from app.adapters.elasticsearch import Shipper
+from app.adapters.elasticsearch import ShipperManager
 
 
 @freeze_time("2023-03-12 09:47:52.039684+00:00")
@@ -51,7 +51,7 @@ def test_router():
     with mock.patch("elasticsearch.Elasticsearch.bulk", mock.MagicMock()) as bulk:
 
         router = Router(
-            Shipper("http://whatever:9200", "whatever")
+            ShipperManager("http://whatever:9200", "whatever")
         )
 
         events = [func.EventHubEvent(
