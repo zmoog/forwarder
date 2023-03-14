@@ -8,10 +8,13 @@ from elasticsearch.helpers import bulk
 from app.models import Event
 
 
+DEFAULT_INDEX_OR_DATASTREAM = "logs-azure.eventhub-esf"
+
+
 class ShipperManager:
     """The ShipperManager is a context manager for Shipper"""
 
-    def __init__(self, endpoint: str, api_key: str, es: Elasticsearch = None, index_or_datastream = "logs-azure.eventhub-esf") -> None:
+    def __init__(self, endpoint: str, api_key: str, es: Elasticsearch = None, index_or_datastream = DEFAULT_INDEX_OR_DATASTREAM) -> None:
         self.client = es if es else Elasticsearch(endpoint, api_key=api_key)
         self.index_or_datastream = index_or_datastream
         self.shipper = None
@@ -32,8 +35,9 @@ class ShipperManager:
         return ShipperManager(
             endpoint=os.environ["ELASTICSEARCH_ENDPOINT"],
             api_key=os.environ["ELASTICSEARCH_API_KEY"],
+            index_or_datastream=os.environ["ELASTICSEARCH_INDEX_OR_DATASTREAM", DEFAULT_INDEX_OR_DATASTREAM],
         )
-    
+
 
 class Shipper:
     """The Shipper sends events to Elasticsearch"""
@@ -47,14 +51,14 @@ class Shipper:
         """Get information about the Elasticsearch cluster"""
         return self.client.info()
 
-    def send(self, event: Event) -> None:
+    def send(self, event: Event, index_or_datastream: str = None) -> None:
         """Send an event to Elasticsearch"""
         now = datetime.datetime.now(datetime.timezone.utc)
 
         event["@timestamp"] = now.isoformat()
 
         self.actions.append({
-            "_index": self.index_or_datastream,
+            "_index": index_or_datastream if index_or_datastream else self.index_or_datastream,
             "_op_type": "create",
             "_source": event,
         })

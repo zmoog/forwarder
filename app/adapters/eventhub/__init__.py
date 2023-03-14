@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 import azure.functions as func
 
-from app.adapters.elasticsearch import Shipper, ShipperManager
+from app.adapters.elasticsearch import ShipperManager
 from .codec import AzureLogsCodec
 
 
@@ -29,7 +29,6 @@ class Router:
                     _shipper.send({
                         "event": {
                             "kind": "event",
-
                         },
                         "cloud": {
                             "provider": "azure",
