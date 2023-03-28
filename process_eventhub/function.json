@@ -8,7 +8,8 @@
       "eventHubName": "testing",
       "connection": "receiverConnectionString",
       "cardinality": "many",
-      "consumerGroup": "$Default"
+      "consumerGroup": "$Default",
+      "dataType": "string"
     }
   ]
 }
