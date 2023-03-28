@@ -1,6 +1,6 @@
-import dataclasses
 import datetime
 import os
+from typing import Any, Dict, List
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
@@ -41,14 +41,14 @@ class Shipper:
         self,
         es: Elasticsearch,
     ) -> None:
-        self.client = es
-        self.actions = []
+        self.client: Elasticsearch = es
+        self.actions: List[Dict[str, Any]] = []
 
     def info(self):
         """Get information about the Elasticsearch cluster"""
         return self.client.info()
 
-    def send(self, event: Event, index_or_datastream: str = None) -> None:
+    def send(self, event: Event, index_or_datastream: str) -> None:
         """Send an event to Elasticsearch"""
         now = datetime.datetime.now(datetime.timezone.utc)
 

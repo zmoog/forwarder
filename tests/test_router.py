@@ -65,8 +65,8 @@ def test_router():
         bulk.assert_called_once_with(
             operations=[
                 b'{"create":{"_index":"logs-generic-default"}}',
-                b'{"event":{"kind":"event"},"cloud":{"provider":"azure"},"agent":{"name":"forwarder","type":"azure-function"},"message":"{\\"foo\\": \\"bar\\"}","azure-eventhub":{},"tags":["preserve_original_event","parse_message"],"@timestamp":"2023-03-12T09:47:52.039684+00:00"}',
+                b'{"event":{"kind":"event"},"cloud":{"provider":"azure"},"agent":{"name":"forwarder","type":"azure-function"},"message":"{\\"foo\\": \\"bar\\"}","azure-eventhub":{},"tags":["preserve_original_event","parse_message"],"@timestamp":"2023-03-12T09:47:52.039684+00:00"}',  # noqa: E501
                 b'{"create":{"_index":"logs-generic-default"}}',
-                b'{"event":{"kind":"event"},"cloud":{"provider":"azure"},"agent":{"name":"forwarder","type":"azure-function"},"message":"{\\"foo\\": \\"baz\\"}","azure-eventhub":{},"tags":["preserve_original_event","parse_message"],"@timestamp":"2023-03-12T09:47:52.039684+00:00"}',
+                b'{"event":{"kind":"event"},"cloud":{"provider":"azure"},"agent":{"name":"forwarder","type":"azure-function"},"message":"{\\"foo\\": \\"baz\\"}","azure-eventhub":{},"tags":["preserve_original_event","parse_message"],"@timestamp":"2023-03-12T09:47:52.039684+00:00"}',  # noqa: E501
             ],
         )

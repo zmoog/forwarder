@@ -2,8 +2,6 @@ import json
 import logging
 from typing import List
 
-from forwarder.models import Event
-
 
 class AzureLogsCodec:
     """Azure Logs Codec"""

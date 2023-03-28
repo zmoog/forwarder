@@ -27,8 +27,6 @@ class Router:
         """Dispatches events to the appropriate shipper"""
         with self.shipper_manager as _shipper:
             for event in events:
-                # logging.info('Python EventHub trigger processed an event: %s', event.get_body().decode('utf-8'))
-                # print("metadata", event.__trigger_metadata)
                 eventhub_details = _extract_eventhub_details(event)
                 eventhub_name = eventhub_details.get("eventhub", "unknown")
 

@@ -4,7 +4,7 @@ sources = forwarder process_eventhub tests
 line_length = 79
 black_options = --line-length=${line_length} ${sources}
 isort_options = --line-length=${line_length} --py 39 --profile black ${sources}
-mypy_options = ${sources}
+mypy_options = -p forwarder
 
 lint: lint-black lint-isort lint-ruff  ## Lint the project on the host
 
