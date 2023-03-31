@@ -5,10 +5,11 @@
       "type": "eventHubTrigger",
       "name": "events",
       "direction": "in",
-      "eventHubName": "azurelogs",
+      "eventHubName": "testing",
       "connection": "receiverConnectionString",
       "cardinality": "many",
-      "consumerGroup": "$Default"
+      "consumerGroup": "$Default",
+      "dataType": "string"
     }
   ]
 }
